@@ -17,6 +17,8 @@
 ├── App.tsx             # 메인 앱 로직 및 상태 관리
 ├── types.ts            # TypeScript 타입 정의
 ├── constants.ts        # 설정 값 (GitHub URL, Google Script URL 등)
+├── vite.config.ts      # Vite 빌드 설정
+├── package.json        # 의존성 및 스크립트
 ├── components/         # UI 컴포넌트
 │   ├── StartPage.tsx   # 시작 화면 (인적사항)
 │   ├── SurveyPage.tsx  # 설문 화면 (이미지 + 리커트 척도)
@@ -27,35 +29,51 @@
     └── imageService.ts # 이미지 URL 및 그룹 할당 로직
 ```
 
-## 3. 설정 및 실행 방법
+## 3. 설치 및 실행 방법
 
-### 3.1 로컬 실행
+### 3.1 필수 요구사항
+- Node.js 설치 (v16 이상 권장)
+- Git 설치
 
-1. 의존성 설치 (Node.js 필요)
+### 3.2 로컬 실행
+1. 프로젝트 폴더에서 터미널 열기
+2. 의존성 설치:
    ```bash
-   npm install react react-dom react-scripts typescript @types/react @types/node @types/react-dom
+   npm install
    ```
-2. 개발 서버 실행
+3. 개발 서버 실행:
    ```bash
-   npm start
+   npm run dev
    ```
+   브라우저에서 `http://localhost:5173` 접속
 
-### 3.2 이미지 설정
+## 4. GitHub Pages 배포 방법 (자동화)
 
-- 이미지는 GitHub Repository에서 불러옵니다.
-- `constants.ts` 파일을 열어 아래 정보를 수정하세요.
-  ```typescript
-  export const GITHUB_USERNAME = 'yslee11';
-  export const GITHUB_REPO = 'hy_urban';
-  export const GITHUB_IMAGE_PATH = 'images';
-  ```
-- 이미지는 `1.jpg`, `2.jpg` ... 또는 `001.jpg` 형태로 저장되어 있어야 합니다. (`services/imageService.ts`의 `getImageUrl` 함수에서 파일명 형식을 수정할 수 있습니다.)
+이 프로젝트는 `gh-pages` 패키지를 사용하여 GitHub Pages에 쉽게 배포할 수 있도록 설정되어 있습니다.
 
-## 4. Google Sheets 연동 (Backend)
+1. `constants.ts` 파일 확인:
+   - `GITHUB_USERNAME`, `GITHUB_REPO`가 본인의 저장소와 일치하는지 확인하세요.
+
+2. `vite.config.ts` 파일 확인:
+   - `base` 설정이 저장소 이름과 일치하는지 확인하세요.
+   - 예: 저장소 이름이 `hy_urban`이면 `base: '/hy_urban/'` 이어야 합니다.
+
+3. 배포 명령어 실행:
+   ```bash
+   npm run deploy
+   ```
+   - 이 명령어는 프로젝트를 빌드하고 `gh-pages` 브랜치에 업로드합니다.
+
+4. GitHub 설정 확인:
+   - GitHub 저장소의 **Settings** > **Pages**로 이동합니다.
+   - Source가 `gh-pages` 브랜치로 설정되어 있는지 확인합니다.
+   - 배포된 URL로 접속하여 확인합니다.
+
+## 5. Google Sheets 연동 (Backend)
 
 이 웹앱은 Serverless 구조로, Google Apps Script(GAS)를 통해 Google Sheets에 데이터를 저장합니다.
 
-### 4.1 Google Sheet 준비
+### 5.1 Google Sheet 준비
 1. 새 Google Sheet 생성
 2. 시트 이름을 `Results`로 변경하고, 1행(헤더)에 다음 컬럼을 만드세요:
    `Timestamp`, `Gender`, `Age`, `Job`, `GroupId`, `ImageId`, `Aesthetics`, `Stability`, `Identity`, `Depression`, `Boredom`
@@ -63,7 +81,7 @@
    - A열: `StrataKey` (예: 남성_20대)
    - B열: `LastGroup` (마지막으로 할당된 그룹 번호, 초기값 0)
 
-### 4.2 Apps Script 작성
+### 5.2 Apps Script 작성
 1. Google Sheet에서 `확장 프로그램` > `Apps Script` 실행
 2. 아래 코드를 복사하여 붙여넣기 (`Code.gs`)
 
@@ -160,19 +178,3 @@ function saveResults(data) {
    - 유형: `웹 앱`
    - 액세스 권한: `모든 사용자` (필수)
    - 생성된 URL을 복사하여 `constants.ts`의 `GOOGLE_SCRIPT_URL` 변수에 넣으세요.
-
-## 5. 배포 (GitHub Pages)
-
-1. `package.json`에 `"homepage": "https://yourusername.github.io/repo-name"` 추가
-2. `npm install gh-pages --save-dev`
-3. `package.json` scripts에 추가:
-   ```json
-   "predeploy": "npm run build",
-   "deploy": "gh-pages -d build"
-   ```
-4. `npm run deploy` 실행
-
-## 6. 주의사항
-
-- Google Sheets API 호출 시 브라우저 정책(CORS)이나 네트워크 지연이 발생할 수 있습니다. `api.ts`에는 실패 시 랜덤 그룹을 할당하는 Fallback 로직이 포함되어 있습니다.
-- 이미지 로딩 속도는 GitHub CDN 상태에 따라 달라질 수 있습니다.
