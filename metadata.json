@@ -1,0 +1,5 @@
+{
+  "name": "Urban Landscape Survey",
+  "description": "A research survey application for evaluating urban landscape images with psychometric scales, featuring stratified sampling and Google Sheets integration.",
+  "requestFramePermissions": []
+}
